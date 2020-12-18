@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const db = require("../models");
 const passport = require("../config/passport");
 const auth = require("../middleware/auth");
+const User = require("../models/User");
 
 // All routes start with: /auth
 // Route: /auth/register
@@ -71,6 +72,27 @@ router.post("/login", (req, res, next) => {
             return res.json(user);
         });
     })(req, res, next);
+});
+
+// Router: /auth/reset-password
+router.post("/reset-password", async (req, res, next) => {
+    const { email } = req.body;
+
+    // check if email is empty
+    if (email === '') {
+        return res.status(200).json({ message: "Please fill the email" });
+    }
+
+    db.User.findOne({ where: { email: email } })
+        .then(user => {
+            if(!user) {
+                return res.status(200).json({ message: "Email is invalid." });
+            }
+            else {
+                res.json(user);
+            }
+        })
+        .catch(err => res.status(200).json(err));
 });
 
 // Route: /auth/user
